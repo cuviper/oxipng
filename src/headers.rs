@@ -36,6 +36,18 @@ pub enum Headers {
     All,
 }
 
+#[derive(Debug, Clone)]
+pub struct Header {
+    pub key: String,
+    pub data: Vec<u8>,
+}
+
+impl Header {
+    pub fn new(key: String, data: Vec<u8>) -> Self {
+        Header { key, data }
+    }
+}
+
 #[inline]
 pub fn file_header_is_valid(bytes: &[u8]) -> bool {
     let expected_header: [u8; 8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
@@ -47,7 +59,7 @@ pub fn parse_next_header(
     byte_data: &[u8],
     byte_offset: &mut usize,
     fix_errors: bool,
-) -> Result<Option<(String, Vec<u8>)>, PngError> {
+) -> Result<Option<Header>, PngError> {
     let mut rdr = Cursor::new(
         byte_data
             .iter()
@@ -106,7 +118,7 @@ pub fn parse_next_header(
         )));
     }
 
-    Ok(Some((header, data)))
+    Ok(Some(Header::new(header, data)))
 }
 
 pub fn parse_ihdr_header(byte_data: &[u8]) -> Result<IhdrData, PngError> {
